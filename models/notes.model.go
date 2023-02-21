@@ -20,11 +20,6 @@ type Note struct {
 	Created time.Time          `bson:"created"`
 }
 
-type DeleteStruct struct {
-	ID primitive.ObjectID `bson:"note_id,omitempty"`
-}
-
-
 const (
 	collectionName 	= "Notes"
 	databaseName 	= "netforemost"

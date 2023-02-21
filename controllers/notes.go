@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -106,21 +105,21 @@ func UpdateNote(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteNote(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
-	var note models.DeleteStruct
+	query := r.URL.Query()
+	id := query.Get("id")
 
-	fmt.Println("body : ", r.Body)
-	err := json.NewDecoder(r.Body).Decode(&note)
+	idvalid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
-	return
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
-	fmt.Println("Delete ID: ", note)
-	result, err := models.DeleteNote(db, note.ID)
+
+	result, err := models.DeleteNote(db, idvalid)
 	if err != nil {
 	http.Error(w, err.Error(), http.StatusBadRequest)
 	return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	responses.JSON(w, http.StatusOK, result)
 }
