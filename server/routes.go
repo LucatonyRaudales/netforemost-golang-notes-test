@@ -4,20 +4,20 @@ import (
 	"net/http"
 	"netforemost/controllers"
 )
-func  RoutesHandlers(mux *http.ServeMux){
-	mux.HandleFunc("/notes", HandleNotes)
+func (s *Server)  RoutesHandlers(mux *http.ServeMux){
+	mux.HandleFunc("/notes", s.HandleNotes)
 }
 
-func HandleNotes(w http.ResponseWriter, r *http.Request){
+func (s *Server) HandleNotes(w http.ResponseWriter, r *http.Request){
 	switch r.Method {
 		case http.MethodGet:
-			controllers.GetNotes(Server.DB, w, r)
+			controllers.GetNotes(s.DB, w, r)
 		case http.MethodPost:
-			controllers.MyServer.CreateNote(Server.DB, w, r)
+			controllers.CreateNote(s.DB, w, r)
 		case http.MethodPut:
-			controllers.MyServer.UpdateNote(Server.DB, w, r)
+			controllers.UpdateNote(s.DB, w, r)
 		case http.MethodDelete:
-			controllers.MyServer.DeleteNote(Server.DB, w, r)
+			controllers.DeleteNote(s.DB, w, r)
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}

@@ -20,6 +20,11 @@ type Note struct {
 	Created time.Time          `bson:"created"`
 }
 
+type DeleteStruct struct {
+	ID primitive.ObjectID `bson:"note_id,omitempty"`
+}
+
+
 const (
 	collectionName 	= "Notes"
 	databaseName 	= "netforemost"
@@ -73,7 +78,7 @@ func (note *Note) FindNotes(db *mongo.Client, filter primitive.M, options *optio
 func (note *Note) UpdateNote(db *mongo.Client, filter, update primitive.M)(*mongo.UpdateResult, error){
 	var err error
 
-	collection := db.Database("netforemost").Collection("notes")
+	collection := db.Database(databaseName).Collection(collectionName)
 	result, err := collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return nil, err
@@ -84,7 +89,7 @@ func (note *Note) UpdateNote(db *mongo.Client, filter, update primitive.M)(*mong
 
 func DeleteNote(db *mongo.Client, noteID primitive.ObjectID) (*mongo.DeleteResult, error) {
 	filter := bson.M{"_id": noteID}
-	collection := db.Database("netforemost").Collection("notes")
+	collection := db.Database(databaseName).Collection(collectionName)
 	result, err := collection.DeleteOne(context.Background(), filter)
 	if err != nil {
 		return nil, err

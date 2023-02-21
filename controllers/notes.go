@@ -3,8 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"time"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,16 +17,13 @@ import (
 
 
 func  GetNotes(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
-	// Parse query parameters
 	query := r.URL.Query()
 	order := query.Get("order")
 	search := query.Get("search")
 
-	// Set up filter and options for MongoDB query
 	filter := bson.M{}
 	options := options.Find()
 	if search != "" {
-		// Use regex to perform case-insensitive search on title and body fields
 		filter["$or"] = bson.A{
 			bson.M{"title": primitive.Regex{Pattern: search, Options: "i"}},
 			bson.M{"body": primitive.Regex{Pattern: search, Options: "i"}},
@@ -47,7 +44,7 @@ func  GetNotes(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
 
 	note := models.Note{}
 
-	notes, err := note.FindNotes(s.DB, filter, options)
+	notes, err := note.FindNotes(db	, filter, options)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -90,41 +87,40 @@ func UpdateNote(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 	return
 	}
-	
-	idParam := strings.TrimPrefix(r.URL.Path, "/notes/")
-	id, err := primitive.ObjectIDFromHex(idParam)
-	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
-		return
-	}
 
-	filter := bson.M{"_id": id}
+	filter := bson.M{"_id": note.ID}
 	update := bson.M{"$set": bson.M{
 		"title":   note.Title,
 		"body":    note.Body,
 		"created": time.Now(),
 	}}
 
-	result, err := note.UpdateNote(db, filter, update)
+	_, err = note.UpdateNote(db, filter, update)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	responses.JSON(w, http.StatusOK, result)
+	responses.JSON(w, http.StatusOK, note)
 }
 
 func DeleteNote(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
-	idParam := strings.TrimPrefix(r.URL.Path, "/notes/")
+	var note models.DeleteStruct
 
-	id, err := primitive.ObjectIDFromHex(idParam)
+	fmt.Println("body : ", r.Body)
+	err := json.NewDecoder(r.Body).Decode(&note)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	return
+	}
+	fmt.Println("Delete ID: ", note)
+	result, err := models.DeleteNote(db, note.ID)
 	if err != nil {
 	http.Error(w, err.Error(), http.StatusBadRequest)
 	return
 	}
-
-	result, err := models.DeleteNote(db, id)
+	
 	w.Header().Set("Content-Type", "application/json")
 	responses.JSON(w, http.StatusOK, result)
 }
