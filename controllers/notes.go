@@ -49,7 +49,6 @@ func  GetNotes(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	responses.JSON(w, http.StatusOK, notes)
 }
 
@@ -74,7 +73,6 @@ func CreateNote(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	responses.JSON(w, http.StatusCreated, noteCreated)
 }
 
@@ -100,7 +98,6 @@ func UpdateNote(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	responses.JSON(w, http.StatusOK, note)
 }
 
@@ -120,6 +117,5 @@ func DeleteNote(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
 	return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	responses.JSON(w, http.StatusOK, result)
 }
