@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -67,4 +68,26 @@ func (note *Note) FindNotes(db *mongo.Client, filter primitive.M, options *optio
 		notes = append(notes, note)
 	}
 	return &notes, nil
+}
+
+func (note *Note) UpdateNote(db *mongo.Client, filter, update primitive.M)(*mongo.UpdateResult, error){
+	var err error
+
+	collection := db.Database(databaseName).Collection(collectionName)
+	result, err := collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func DeleteNote(db *mongo.Client, noteID primitive.ObjectID) (*mongo.DeleteResult, error) {
+	filter := bson.M{"_id": noteID}
+	collection := db.Database(databaseName).Collection(collectionName)
+	result, err := collection.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
