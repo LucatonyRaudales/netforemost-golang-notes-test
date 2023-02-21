@@ -2,7 +2,7 @@ package server
 
 import (
 	"net/http"
-	"netforemost/utils/responses"
+	"netforemost/controllers"
 )
 func  RoutesHandlers(mux *http.ServeMux){
 	mux.HandleFunc("/notes", HandleNotes)
@@ -11,19 +11,14 @@ func  RoutesHandlers(mux *http.ServeMux){
 func HandleNotes(w http.ResponseWriter, r *http.Request){
 	switch r.Method {
 		case http.MethodGet:
-			message := struct {
-				Text string `json:"message"`
-			}{
-				Text: "das",
-			}
-			responses.JSON(w, http.StatusCreated, message)
+			controllers.GetNotes(Server.DB, w, r)
 		case http.MethodPost:
-			// Post notes
+			controllers.MyServer.CreateNote(Server.DB, w, r)
 		case http.MethodPut:
-			// Put notes
+			controllers.MyServer.UpdateNote(Server.DB, w, r)
 		case http.MethodDelete:
-			// Delete notes
+			controllers.MyServer.DeleteNote(Server.DB, w, r)
 		default:
-			// Unknown method
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
