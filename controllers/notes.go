@@ -50,7 +50,7 @@ func  GetNotes(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	responses.JSON(w, http.StatusAccepted, notes)
+	responses.JSON(w, http.StatusOK, notes)
 }
 
 func CreateNote(db *mongo.Client, w http.ResponseWriter, r *http.Request) {
